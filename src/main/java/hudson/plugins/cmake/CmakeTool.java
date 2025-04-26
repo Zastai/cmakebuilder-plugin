@@ -11,6 +11,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Util;
@@ -18,6 +19,7 @@ import hudson.init.Initializer;
 import hudson.model.Computer;
 import hudson.model.EnvironmentSpecific;
 import hudson.model.Node;
+import hudson.model.PersistentDescriptor;
 import hudson.model.TaskListener;
 import hudson.slaves.NodeSpecific;
 import hudson.tools.InstallSourceProperty;
@@ -27,6 +29,7 @@ import hudson.tools.ToolInstaller;
 import hudson.tools.ToolProperty;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.jenkinsci.Symbol;
 
 /**
  * Information about Cmake installation. A CmakeTool is used to select between
@@ -213,7 +216,8 @@ public class CmakeTool extends ToolInstallation implements
     // //////////////////////////////////////////////////////////////////
 
     @Extension
-    public static class DescriptorImpl extends ToolDescriptor<CmakeTool> {
+    @Symbol("cmake")
+    public static class DescriptorImpl extends ToolDescriptor<CmakeTool> implements PersistentDescriptor {
 
         public DescriptorImpl() {
             load();
@@ -249,6 +253,17 @@ public class CmakeTool extends ToolInstallation implements
         @Override
         public List<? extends ToolInstaller> getDefaultInstallers() {
             return Collections.singletonList(new CmakeInstaller(null));
+        }
+
+        /**
+         * Sets the set of configured CMake installations.
+         *
+         * @param installations The set of configured CMake installations.
+         */
+        @Override
+        public void setInstallations(@NonNull CmakeTool... installations) {
+            super.setInstallations(installations);
+            this.save();
         }
 
     } // DescriptorImpl
